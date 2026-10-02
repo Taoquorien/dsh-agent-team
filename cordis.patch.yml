@@ -1,0 +1,12 @@
+# Agent Team Definitions bundle.
+#
+# Registers one skill per team found under the plugin's `teams/` directory, plus a
+# read-only `/team` command that lists the definitions and the remaining team slots.
+#
+# `teamsDir` is optional: when omitted the plugin resolves `teams/` next to its own
+# index.js, so the bundle works from the dsh installation or from a profile install
+# without any absolute path in this patch.
+- insert:
+    - id: agent-team-definitions
+      name: '@local/dsh-agent-team'
+      config: {}

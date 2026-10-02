@@ -1,0 +1,222 @@
+{
+  "$comment": "Declarative roster for the trading-team. The Lead reads this to know who exists, which phase each member belongs to, and what marker each hands back. `spawnName` is the exact value for spawn_teammate's `name` parameter.",
+  "schemaVersion": 1,
+  "name": "trading-team",
+  "displayName": {
+    "zh": "交易分析团队",
+    "en": "Trading Analysis Team"
+  },
+  "version": "1.0.0",
+  "source": {
+    "kind": "ported",
+    "upstream": "WorkBuddy expert package `trading-agent` (Expert Marketplace, v1.0.0)",
+    "note": "Roster, phases and specialist instructions ported from the WorkBuddy expert team. The data-acquisition section was rewritten for DeepSeek Harness, which has no `neodata-financial-search` skill."
+  },
+  "lead": {
+    "name": "lead",
+    "displayName": { "zh": "何执舟", "en": "He" },
+    "profession": { "zh": "首席策略官", "en": "Chief Strategist" },
+    "note": "The Lead is the session agent itself. It is NOT spawned; it orchestrates, relays and compiles."
+  },
+  "limits": {
+    "maxMembers": 64,
+    "note": "The Agent Teams runtime caps a team at the profile's maxMembers CUMULATIVELY, not concurrently: the roster is immutable and names are never reused, so every spawn permanently consumes one slot for the whole session. This profile raises the cap to 64, so the full 12-member roster runs without degradation. Verified against the runtime: `if (state.members.length >= this.maxMembers) throw new TeamError('Team member limit ... reached', 'TEAM_MEMBER_LIMIT')`, where `state.members` only ever grows.",
+    "degradation": "Only needed when a session has already consumed slots (e.g. another team ran first). Run the highest-value prefix: Phase 1 (4) + Phase 2 (3) + Phase 3 (1) = 8 members, which still yields a debated BUY/SELL/HOLD. Phase 4 (three-way risk debate + risk adjudicator, 4 members) is the first thing to drop; fold the risk statements from Phase 1 reports into the final report and state the omission explicitly.",
+    "raise": "The cap lives on the `agent-team` row of the profile's cordis.patch.yml (the profile patch overrides the bundle default of 8). Patch application replaces the whole `config` object, so all five limit keys must be restated together."
+  },
+  "members": [
+    {
+      "spawnName": "market-analyst",
+      "displayName": { "zh": "涂一线", "en": "Tu" },
+      "profession": { "zh": "技术分析师", "en": "Technical Analyst" },
+      "phase": 1,
+      "brief": "members/market-analyst.md",
+      "marker": "[市场技术分析报告]",
+      "expertise": "价格走势、均线、MACD/RSI/KDJ、支撑阻力、趋势与动量"
+    },
+    {
+      "spawnName": "fundamentals-analyst",
+      "displayName": { "zh": "季本实", "en": "Ji" },
+      "profession": { "zh": "基本面分析师", "en": "Fundamentals Analyst" },
+      "phase": 1,
+      "brief": "members/fundamentals-analyst.md",
+      "marker": "[基本面分析报告]",
+      "expertise": "财报解读、ROE/毛利率/负债率、成长性、估值分位"
+    },
+    {
+      "spawnName": "news-analyst",
+      "displayName": { "zh": "闻一新", "en": "Wen" },
+      "profession": { "zh": "新闻分析师", "en": "News Analyst" },
+      "phase": 1,
+      "brief": "members/news-analyst.md",
+      "marker": "[新闻分析报告]",
+      "expertise": "公司公告、行业政策、宏观事件、产业链信号"
+    },
+    {
+      "spawnName": "sentiment-analyst",
+      "displayName": { "zh": "莫慌言", "en": "Mo" },
+      "profession": { "zh": "情绪分析师", "en": "Sentiment Analyst" },
+      "phase": 1,
+      "brief": "members/sentiment-analyst.md",
+      "marker": "[情绪分析报告]",
+      "expertise": "主力资金、机构评级、龙虎榜、融资融券、北向资金"
+    },
+    {
+      "spawnName": "bull-researcher",
+      "displayName": { "zh": "牛正阳", "en": "Niu" },
+      "profession": { "zh": "多头研究员", "en": "Bull Researcher" },
+      "phase": 2,
+      "brief": "members/bull-researcher.md",
+      "marker": "Bull Analyst: [多头论证]",
+      "expertise": "构建买入论证、上行驱动、看多逻辑闭环"
+    },
+    {
+      "spawnName": "bear-researcher",
+      "displayName": { "zh": "熊正寒", "en": "Xiong" },
+      "profession": { "zh": "空头研究员", "en": "Bear Researcher" },
+      "phase": 2,
+      "brief": "members/bear-researcher.md",
+      "marker": "Bear Analyst: [空头论证]",
+      "expertise": "构建卖出/风险论证、下行风险、看空逻辑闭环"
+    },
+    {
+      "spawnName": "research-manager",
+      "displayName": { "zh": "蔡定锋", "en": "Cai" },
+      "profession": { "zh": "研究主管", "en": "Research Manager" },
+      "phase": 2,
+      "brief": "members/research-manager.md",
+      "marker": "[投资计划]",
+      "expertise": "裁判多空辩论，果断输出投资计划（不和稀泥）"
+    },
+    {
+      "spawnName": "trader",
+      "displayName": { "zh": "程交远", "en": "Cheng" },
+      "profession": { "zh": "交易员", "en": "Trader" },
+      "phase": 3,
+      "brief": "members/trader.md",
+      "marker": "[交易员决策]",
+      "expertise": "基于投资计划给出交易提案（入场价/目标价/止损）"
+    },
+    {
+      "spawnName": "aggressive-risk-analyst",
+      "displayName": { "zh": "甘为先", "en": "Gan" },
+      "profession": { "zh": "激进风险分析师", "en": "Aggressive Risk Analyst" },
+      "phase": 4,
+      "brief": "members/aggressive-risk-analyst.md",
+      "marker": "Aggressive Analyst: [激进派论证]",
+      "expertise": "强调上行空间与错失成本，挑战保守观点"
+    },
+    {
+      "spawnName": "conservative-risk-analyst",
+      "displayName": { "zh": "沈行远", "en": "Shen" },
+      "profession": { "zh": "保守风险分析师", "en": "Conservative Risk Analyst" },
+      "phase": 4,
+      "brief": "members/conservative-risk-analyst.md",
+      "marker": "Conservative Analyst: [保守派论证]",
+      "expertise": "揭示下行风险与尾部事件，挑战乐观假设"
+    },
+    {
+      "spawnName": "neutral-risk-analyst",
+      "displayName": { "zh": "钟允平", "en": "Zhong" },
+      "profession": { "zh": "中性风险分析师", "en": "Neutral Risk Analyst" },
+      "phase": 4,
+      "brief": "members/neutral-risk-analyst.md",
+      "marker": "Neutral Analyst: [中性派论证]",
+      "expertise": "平衡视角，推荐温和分批/对冲策略"
+    },
+    {
+      "spawnName": "risk-manager",
+      "displayName": { "zh": "严控风", "en": "Yan" },
+      "profession": { "zh": "风险主管", "en": "Risk Manager" },
+      "phase": 4,
+      "brief": "members/risk-manager.md",
+      "marker": "[最终交易决策]",
+      "expertise": "裁判三方风险辩论，输出最终交易决策"
+    }
+  ],
+  "phases": [
+    {
+      "phase": 1,
+      "name": "数据收集",
+      "mode": "parallel",
+      "members": ["market-analyst", "fundamentals-analyst", "news-analyst", "sentiment-analyst"],
+      "outputs": ["[市场技术分析报告]", "[基本面分析报告]", "[新闻分析报告]", "[情绪分析报告]"]
+    },
+    {
+      "phase": 2,
+      "name": "多空辩论",
+      "mode": "sequential",
+      "members": ["bull-researcher", "bear-researcher", "research-manager"],
+      "outputs": ["Bull Analyst: [多头论证]", "Bear Analyst: [空头论证]", "[投资计划]"],
+      "note": "Sequential because each member consumes the previous member's argument."
+    },
+    {
+      "phase": 3,
+      "name": "交易决策",
+      "mode": "single",
+      "members": ["trader"],
+      "outputs": ["[交易员决策]"]
+    },
+    {
+      "phase": 4,
+      "name": "风险评估",
+      "mode": "parallel-then-sequential",
+      "members": ["aggressive-risk-analyst", "conservative-risk-analyst", "neutral-risk-analyst", "risk-manager"],
+      "outputs": ["Aggressive Analyst: [激进派论证]", "Conservative Analyst: [保守派论证]", "Neutral Analyst: [中性派论证]", "[最终交易决策]"],
+      "note": "The three risk analysts debate in parallel; risk-manager then adjudicates sequentially."
+    },
+    {
+      "phase": 5,
+      "name": "整合报告",
+      "mode": "lead-only",
+      "members": [],
+      "outputs": ["最终投资分析报告"],
+      "note": "The Lead compiles. It must not delegate this."
+    }
+  ],
+  "workflows": [
+    {
+      "id": "full",
+      "name": "个股完整分析",
+      "trigger": "用户问「帮我分析 X」「X 该不该买」「全面评估 X」，未指定简化",
+      "phases": [1, 2, 3, 4, 5]
+    },
+    {
+      "id": "quick",
+      "name": "快速分析",
+      "trigger": "用户说「快速」「简要」「简单看看」",
+      "phases": [1, 3, 5],
+      "members": ["market-analyst", "fundamentals-analyst", "trader"],
+      "note": "Skip the debate and the risk assessment; say so in the final report."
+    },
+    {
+      "id": "debate",
+      "name": "辩论模式",
+      "trigger": "用户已提供 4 份原始数据",
+      "phases": [2, 3, 4, 5]
+    },
+    {
+      "id": "risk-only",
+      "name": "风险诊断",
+      "trigger": "用户只要风险评估",
+      "phases": [1, 4, 5],
+      "note": "Phase 1 members return data digests rather than full reports."
+    }
+  ],
+  "singleMemberRoutes": {
+    "note": "A question about one dimension does not need the full workflow. Spawn only the matching member.",
+    "技术指标|K线": "market-analyst",
+    "财报|估值": "fundamentals-analyst",
+    "新闻|政策": "news-analyst",
+    "资金流向|机构态度": "sentiment-analyst",
+    "已有结论只要交易方案": "trader"
+  },
+  "rules": [
+    "数据源：本会话没有 neodata-financial-search。成员用 web_search / web_fetch 取公开数据，每个关键数字必须可溯源；拿不到就写「未获取到」，禁止编造。",
+    "裁决纪律：research-manager 与 risk-manager 必须给出明确 BUY/SELL/HOLD，不得以「双方都有道理」默认 HOLD。",
+    "不得代写：Lead 只做编排与汇编，绝不代写成员的专业产出。",
+    "并行纪律：Phase 1 与 Phase 4 三方必须并行；Phase 2/3 有依赖，必须顺序。",
+    "Python：本会话解释器是 python3，没有 python 命令。",
+    "收口：Lead 在给出最终答案前必须等齐所有必需成员；最终报告末尾附免责声明。"
+  ]
+}

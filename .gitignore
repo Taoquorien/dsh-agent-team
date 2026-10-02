@@ -1,0 +1,25 @@
+# Node / pnpm
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# OS noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# Python bytecode from the data script
+__pycache__/
+*.pyc
+*.pyo
+
+# Local scratch — never commit run artifacts or the temp profiles used to test
+# a clean install
+.tmp_*/
+tmp_*/
+*.log
+
+# Repo-local virtualenv, if a maintainer creates one for the tools
+.venv/
+venv/

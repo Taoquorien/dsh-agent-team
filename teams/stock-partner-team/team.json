@@ -1,0 +1,171 @@
+{
+  "$comment": "Declarative roster for the stock-partner-team. The Lead reads this to know who exists and what marker each hands back. `spawnName` is the exact value for spawn_teammate's `name` parameter.",
+  "schemaVersion": 1,
+  "name": "stock-partner-team",
+  "displayName": {
+    "zh": "股票投研专家团",
+    "en": "Equity Research Roundtable"
+  },
+  "version": "1.0.0",
+  "source": {
+    "kind": "ported",
+    "upstream": "WorkBuddy expert package `stock-partner-team` (Expert Marketplace, v1.0.7)",
+    "note": "Roster, member personas and the roundtable orchestration method ported from the WorkBuddy expert team. The `westock-mcp` connector data channel was rewritten for DeepSeek Harness, which has no such connector, and the mandatory `md-to-html` rendering step was dropped because DSH ships no such skill."
+  },
+  "lead": {
+    "name": "lead",
+    "displayName": { "zh": "圆汇众", "en": "Yuan" },
+    "profession": { "zh": "投研主编", "en": "Research Editor" },
+    "note": "The Lead is the session agent itself. It is NOT spawned; it chairs the roundtable, relays, and compiles the 4-module roundtable report. Cross-member integration is the Lead's job alone."
+  },
+  "limits": {
+    "maxMembers": 64,
+    "note": "The Agent Teams runtime caps a team at the profile's maxMembers CUMULATIVELY, not concurrently: the roster is immutable and names are never reused, so every spawn permanently consumes one slot for the whole session. This profile raises the cap to 64 so every bundled team runs in full. Verified against the runtime: `if (state.members.length >= this.maxMembers) throw new TeamError('Team member limit ... reached', 'TEAM_MEMBER_LIMIT')`.",
+    "degradation": "Not expected at this cap. If slots are short, seat the highest-value members for the question (Step 2 of the roundtable method) and note absent seats in module 2 of the report.",
+    "raise": "The cap lives on the `agent-team` row of the profile's cordis.patch.yml (the profile patch overrides the bundle default of 8)."
+  },
+  "members": [
+    {
+      "spawnName": "industry-strategist",
+      "displayName": { "zh": "星望远", "en": "Xing" },
+      "profession": { "zh": "产业策略师", "en": "Industry Strategist" },
+      "phase": 1,
+      "brief": "members/industry-strategist.md",
+      "marker": "[产业策略报告]",
+      "expertise": "产业趋势、产业链拆解、景气度排序、牛熊判断（自上而下，会空仓）"
+    },
+    {
+      "spawnName": "signal-chief",
+      "displayName": { "zh": "洲四方", "en": "Zhou" },
+      "profession": { "zh": "信号派首席", "en": "Signal Chief" },
+      "phase": 1,
+      "brief": "members/signal-chief.md",
+      "marker": "[信号研判报告]",
+      "expertise": "四层信号对齐（政策/产业/资讯/资金）、系统性风险预警、卖出时机、操作纪律"
+    },
+    {
+      "spawnName": "valuation-analyst",
+      "displayName": { "zh": "文衡价", "en": "Wen" },
+      "profession": { "zh": "估值分析师", "en": "Valuation Analyst" },
+      "phase": 1,
+      "brief": "members/valuation-analyst.md",
+      "marker": "[估值分析报告]",
+      "expertise": "PE Bands / PEG 精确定价、核心+卫星仓位、大类资产配置"
+    },
+    {
+      "spawnName": "contrarian-investor",
+      "displayName": { "zh": "坤候底", "en": "Kun" },
+      "profession": { "zh": "逆向投资人", "en": "Contrarian Investor" },
+      "phase": 1,
+      "brief": "members/contrarian-investor.md",
+      "marker": "[逆向视角报告]",
+      "expertise": "支撑位分批建仓、情绪极值、深套心态、极简框架（模糊判断价格高低）"
+    },
+    {
+      "spawnName": "fundamental-researcher",
+      "displayName": { "zh": "钊审财", "en": "Zhao" },
+      "profession": { "zh": "财报研究员", "en": "Fundamental Researcher" },
+      "phase": 1,
+      "brief": "members/fundamental-researcher.md",
+      "marker": "[财报研究报告]",
+      "expertise": "个股基本面深挖、季度跟踪、管理层动作、生活体感（自下而上，永远满仓靠调仓）"
+    },
+    {
+      "spawnName": "shortterm-surfer",
+      "displayName": { "zh": "磊追浪", "en": "Lei" },
+      "profession": { "zh": "短线冲浪手", "en": "Short-term Surfer" },
+      "phase": 1,
+      "brief": "members/shortterm-surfer.md",
+      "marker": "[短线节奏报告]",
+      "expertise": "当周主线判断、集合竞价、龙头识别、技术止损（天级别盘面信号）"
+    }
+  ],
+  "phases": [
+    {
+      "phase": 1,
+      "name": "圆桌并行研讨",
+      "mode": "parallel",
+      "members": [
+        "industry-strategist",
+        "signal-chief",
+        "valuation-analyst",
+        "contrarian-investor",
+        "fundamental-researcher",
+        "shortterm-surfer"
+      ],
+      "outputs": [
+        "[产业策略报告]",
+        "[信号研判报告]",
+        "[估值分析报告]",
+        "[逆向视角报告]",
+        "[财报研究报告]",
+        "[短线节奏报告]"
+      ],
+      "note": "Members are dispatched in ONE message so they run in parallel. They do not read each other's conclusions — seeing a peer's verdict biases the independent view. Members may be seated selectively (see the roundtable method), and each still reports only its own methodology."
+    },
+    {
+      "phase": 2,
+      "name": "主理人汇编",
+      "mode": "lead-only",
+      "members": [],
+      "outputs": ["圆桌报告（4 模块）"],
+      "note": "The Lead compiles from the SendMessage bodies alone — not from local files. It must not delegate this."
+    }
+  ],
+  "workflows": [
+    {
+      "id": "single-stock",
+      "name": "单股深度研判",
+      "trigger": "「帮我分析 XX」「XX 现在怎么看」",
+      "phases": [1, 2],
+      "members": [
+        "fundamental-researcher",
+        "valuation-analyst",
+        "signal-chief",
+        "industry-strategist",
+        "contrarian-investor",
+        "shortterm-surfer"
+      ]
+    },
+    {
+      "id": "theme",
+      "name": "主题 / 大盘研判",
+      "trigger": "「新能源还能追吗」「最近大盘怎么看」「汇率影响」",
+      "phases": [1, 2],
+      "members": ["industry-strategist", "signal-chief", "valuation-analyst", "shortterm-surfer"]
+    },
+    {
+      "id": "portfolio",
+      "name": "多标的组合诊断",
+      "trigger": "「帮我看下持仓」「我这几只票怎么样」",
+      "phases": [1, 2],
+      "members": [
+        "valuation-analyst",
+        "industry-strategist",
+        "signal-chief",
+        "fundamental-researcher",
+        "contrarian-investor"
+      ],
+      "note": "Each member produces ONE portfolio-wide report spanning every holding; pass the full holding list in the task brief."
+    }
+  ],
+  "singleMemberRoutes": {
+    "note": "A question about one lens does not need the roundtable. Spawn only the matching member.",
+    "产业趋势|产业链|景气度": "industry-strategist",
+    "信号|系统性风险|卖出时机": "signal-chief",
+    "估值|PE|贵不贵": "valuation-analyst",
+    "抄底|支撑位|深套": "contrarian-investor",
+    "财报|业绩|基本面": "fundamental-researcher",
+    "短线|龙头|打板|节奏": "shortterm-surfer"
+  },
+  "rules": [
+    "数据源：本会话没有 WorkBuddy 的腾讯自选股连接器（westock-mcp）。成员用 web_fetch / web_search / bash 取公开数据；拿不到就写「未获取到」，禁止编造。",
+    "并行纪律：所有上场成员必须在同一条消息里连续 spawn，禁止两阶段串行（先调 X 拿结论再调 Y）——成员看到他人结论会被带偏。",
+    "不代写：Lead 只做编排与汇编，绝不代写成员的专业产出；缺席席位如实标注。",
+    "共享快照：Lead 可在 spawn 前最多取一次共享快照（现价/涨跌/PE）写入任务说明，成员禁止重复取同一标的；等待期间禁止继续刷行情。",
+    "轮次恢复：成员因轮次耗尽中断时，只发一条恢复指令要求它基于已有数据立即写出精简报告；同一成员最多恢复 1 次，仍失败则标注「缺席/执行中断」。",
+    "收齐即汇编：有效回传 ≥4 席且关键维度已覆盖时即可开始汇编，不要无限空转导致会话掉线。",
+    "Python：本会话解释器是 python3，没有 python 命令。",
+    "收口：最终报告末尾必须附免责声明。"
+  ]
+}

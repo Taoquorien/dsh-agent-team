@@ -1,0 +1,4 @@
+{
+  "title": "智能体团队定义",
+  "description": "为 DeepSeek Harness 提供可复用的智能体团队名册。teams/ 下每个团队包含名册、主理人 SOP skill 与成员指令。"
+}

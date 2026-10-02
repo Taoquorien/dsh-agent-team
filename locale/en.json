@@ -1,0 +1,4 @@
+{
+  "title": "Agent Team Definitions",
+  "description": "Reusable Agent Team rosters for DeepSeek Harness. Each team under teams/ ships a roster, a Lead SOP skill, and per-member briefs."
+}

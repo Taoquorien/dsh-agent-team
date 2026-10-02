@@ -1,0 +1,149 @@
+{
+  "$comment": "Declarative roster for the product-strategy-team. The Lead reads this to know who exists, which phase each member belongs to, and what marker each hands back. `spawnName` is the exact value for spawn_teammate's `name` parameter.",
+  "schemaVersion": 1,
+  "name": "product-strategy-team",
+  "displayName": {
+    "zh": "产品战略团队",
+    "en": "Product Strategy Team"
+  },
+  "version": "1.0.0",
+  "source": {
+    "kind": "authored",
+    "upstream": "WorkBuddy curated expert team `ProductStrategyTeam` (built-in recommendation catalog; category 01-ProductDesign)",
+    "note": "AUTHORED, NOT PORTED. This expert package was never downloaded to this machine — only its catalog entry exists (`curated-experts.json` / the experts manifest), which supplies the roster, display names, professions and the one-line scope of each role, but no member briefs. The five briefs here were written for DSH from that catalog description plus the team's stated coverage of the full product lifecycle. They are therefore NOT verbatim upstream text, unlike the trading-team / gpt-researcher-team / stock-partner-team briefs. To replace them with upstream wording, download the `product-strategy-team` package from the WorkBuddy Expert Marketplace and re-run a porting pass."
+  },
+  "lead": {
+    "name": "lead",
+    "displayName": { "zh": "方向明", "en": "Fang" },
+    "profession": { "zh": "产品舵手", "en": "Product Helmsman" },
+    "note": "The Lead is the session agent itself. It is NOT spawned; it sets product direction, orchestrates the phases and compiles the final deliverable. It owns prioritisation trade-offs, which no single specialist can make."
+  },
+  "limits": {
+    "maxMembers": 64,
+    "note": "The Agent Teams runtime caps a team at the profile's maxMembers CUMULATIVELY, not concurrently: the roster is immutable and names are never reused, so every spawn permanently consumes one slot for the whole session. This profile raises the cap to 64 so every bundled team runs in full. Verified against the runtime: `if (state.members.length >= this.maxMembers) throw new TeamError('Team member limit ... reached', 'TEAM_MEMBER_LIMIT')`.",
+    "degradation": "Not expected at this cap. If slots are short, run Phase 1 with only the two most relevant researchers, then continue to Phase 2 and 3.",
+    "raise": "The cap lives on the `agent-team` row of the profile's cordis.patch.yml (the profile patch overrides the bundle default of 8)."
+  },
+  "members": [
+    {
+      "spawnName": "user-researcher",
+      "displayName": { "zh": "瑞思", "en": "Reese" },
+      "profession": { "zh": "用户研究员", "en": "User Researcher" },
+      "phase": 1,
+      "brief": "members/user-researcher.md",
+      "marker": "[用户研究报告]",
+      "expertise": "用户调研与综合分析：画像、场景、痛点、需求优先级证据"
+    },
+    {
+      "spawnName": "competitive-analyst",
+      "displayName": { "zh": "竞析", "en": "Compa" },
+      "profession": { "zh": "竞品分析师", "en": "Competitive Analyst" },
+      "phase": 1,
+      "brief": "members/competitive-analyst.md",
+      "marker": "[竞品分析报告]",
+      "expertise": "竞争情报：竞品功能矩阵、定位差异、能力缺口与替代方案"
+    },
+    {
+      "spawnName": "data-analyst",
+      "displayName": { "zh": "数析", "en": "Metric" },
+      "profession": { "zh": "数据分析师", "en": "Data Analyst" },
+      "phase": 1,
+      "brief": "members/data-analyst.md",
+      "marker": "[指标分析报告]",
+      "expertise": "指标体系与量化追踪：北极星指标、漏斗、基线、目标与埋点口径"
+    },
+    {
+      "spawnName": "requirement-analyst",
+      "displayName": { "zh": "析客", "en": "Specky" },
+      "profession": { "zh": "需求分析师", "en": "Requirement Analyst" },
+      "phase": 2,
+      "brief": "members/requirement-analyst.md",
+      "marker": "[功能规格书]",
+      "expertise": "PRD 与功能规格：用户故事、验收标准、范围边界、非功能需求"
+    },
+    {
+      "spawnName": "roadmap-planner",
+      "displayName": { "zh": "路径", "en": "Roadie" },
+      "profession": { "zh": "路线图规划师", "en": "Roadmap Planner" },
+      "phase": 3,
+      "brief": "members/roadmap-planner.md",
+      "marker": "[产品路线图]",
+      "expertise": "路线图管理与迭代规划：优先级排序、里程碑、依赖、交付节奏"
+    }
+  ],
+  "phases": [
+    {
+      "phase": 1,
+      "name": "并行调研",
+      "mode": "parallel",
+      "members": ["user-researcher", "competitive-analyst", "data-analyst"],
+      "outputs": ["[用户研究报告]", "[竞品分析报告]", "[指标分析报告]"],
+      "note": "Three independent evidence bases. Dispatched in ONE message so they run in parallel; none depends on the others."
+    },
+    {
+      "phase": 2,
+      "name": "需求定义",
+      "mode": "single",
+      "members": ["requirement-analyst"],
+      "outputs": ["[功能规格书]"],
+      "note": "Consumes all three Phase 1 reports. Produces the PRD / feature spec that Phase 3 prioritises."
+    },
+    {
+      "phase": 3,
+      "name": "路线图规划",
+      "mode": "single",
+      "members": ["roadmap-planner"],
+      "outputs": ["[产品路线图]"],
+      "note": "Consumes the feature spec. Produces prioritised milestones and iteration plans."
+    },
+    {
+      "phase": 4,
+      "name": "整合交付",
+      "mode": "lead-only",
+      "members": [],
+      "outputs": ["产品战略交付物"],
+      "note": "The Lead owns the final trade-offs and compiles. It must not delegate this."
+    }
+  ],
+  "workflows": [
+    {
+      "id": "full",
+      "name": "完整产品规划",
+      "trigger": "「帮我规划这个产品」「做一份产品战略」「从想法到路线图」",
+      "phases": [1, 2, 3, 4]
+    },
+    {
+      "id": "spec",
+      "name": "功能规格书",
+      "trigger": "「帮我写一份功能规格书 / PRD」",
+      "phases": [1, 2, 4],
+      "members": ["user-researcher", "competitive-analyst", "requirement-analyst"],
+      "note": "Skip the roadmap; the Lead compiles the spec directly."
+    },
+    {
+      "id": "roadmap",
+      "name": "路线图规划",
+      "trigger": "「规划产品路线图」「排一下迭代优先级」",
+      "phases": [1, 2, 3, 4],
+      "members": ["competitive-analyst", "data-analyst", "requirement-analyst", "roadmap-planner"],
+      "note": "Leaner Phase 1: competitor and metrics evidence drive prioritisation."
+    }
+  ],
+  "singleMemberRoutes": {
+    "note": "A question about one lens does not need the full workflow. Spawn only the matching member.",
+    "用户调研|用户画像|痛点": "user-researcher",
+    "竞品|竞争对手|市场格局": "competitive-analyst",
+    "指标|数据|KPI|漏斗": "data-analyst",
+    "PRD|功能规格|需求文档": "requirement-analyst",
+    "路线图|排期|迭代规划|优先级": "roadmap-planner"
+  },
+  "rules": [
+    "证据纪律：本会话没有 WorkBuddy 的检索栈。成员用 web_fetch / web_search / bash 取公开数据；拿不到就写「未获取到」，禁止编造用户数据、市场规模或竞品功能。",
+    "区分证据与假设：调研结论必须标明哪些有数据支撑、哪些是待验证假设；不得把假设写成事实。",
+    "不代写：Lead 只做编排与汇编，绝不代写成员的专业产出。",
+    "并行纪律：Phase 1 三人无依赖，必须在同一条消息里连续 spawn；Phase 2/3 有上下游依赖，必须等前一位回传。",
+    "优先级纪律：roadmap-planner 必须给出明确排序与理由（RICE/价值-成本等），不得把所有需求都标为「高优先级」。",
+    "Python：本会话解释器是 python3，没有 python 命令。",
+    "收口：Lead 在给出最终答案前必须等齐所有必需成员；交付物需说明数据缺口与待验证假设。"
+  ]
+}
